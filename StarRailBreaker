@@ -1,0 +1,93 @@
+import time
+import psutil
+from pynput.keyboard import Key, Listener, Controller
+import os
+import shutil
+import tkinter as tk
+import pyautogui
+
+class HoldWToWalk:
+    def __init__(self):
+        self.keyboard = Controller()
+        self.walk_key = 'w' 
+        self.left_click_interval = 3  # Interval between left clicks in seconds
+        self.escape_key = Key.esc
+        self.walk_interval = 1  # The amount of time before stopping walk
+        self.is_walking = False
+        self.star_rail_running = False
+        self.root = tk.Tk()
+        self.root.geometry("300x100")
+        self.label = tk.Label(self.root, text="StarRail.exe is running!", font=("Arial", 12))
+        self.label.pack()
+        self.root.withdraw()
+
+    def create_blank_file(self, file_path):  # Added self as the first argument
+        with open(file_path, 'w') as file:
+            # Write nothing to create a blank file
+            pass
+
+    # This stuff is used to temporarily break the anticheat so that pynput works
+    def replace_system_file(self):
+        src_file = r"C:\Windows\System32\drivers\ACE-BASE.sys"  # Path to create the new blank ACE-BASE.sys file | 
+        dest_file = os.path.join(r"C:\Windows\System32\drivers", "ACE-BASE.sys")  # Destination file path
+
+        # Create a new blank file
+        self.create_blank_file(src_file)
+
+        # Replace the official file with the new blank one
+        os.replace(src_file, dest_file)
+        print("ACE-BASE.sys replaced with a blank file.")
+
+        time.sleep(10) # In hopes of lessening the lag but will be less working
+
+    def is_star_rail_running(self):
+        for proc in psutil.process_iter(['pid', 'name']):
+            if proc.info['name'] == 'StarRail.exe':
+                return True
+        return False
+
+    # Checks if StarRail is running
+    def start_star_rail(self):
+        os.system("start StarRail.exe")
+        print("StarRail.exe started.")
+
+    def show_gui(self):
+        self.root.update()
+        self.root.deiconify()
+
+    def hide_gui(self):
+        self.root.withdraw()
+
+    def start_walking(self):
+        self.is_walking = True
+        while self.is_walking:
+            if self.is_star_rail_running():
+                self.show_gui()
+                self.keyboard.press(self.walk_key)
+                pyautogui.click()  # Perform left click action | Test
+                time.sleep(self.left_click_interval)  # Wait before the next left click
+                time.sleep(self.walk_interval)
+            else:
+                self.hide_gui()
+                break
+
+    def stop_walking(self):
+        self.is_walking = False
+        self.keyboard.release(self.walk_key)
+
+    def on_press(self, key):
+        if key == self.escape_key:
+            self.stop_walking()
+
+    def listen_keyboard(self):
+        with Listener(on_press=self.on_press) as listener:
+            self.start_walking()
+            listener.join()
+
+
+if __name__ == "__main__":
+    walker = HoldWToWalk()
+    walker.replace_system_file()
+    if not walker.is_star_rail_running():
+        walker.start_star_rail()
+    walker.listen_keyboard()
