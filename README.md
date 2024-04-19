@@ -1,9 +1,14 @@
 # StarRailBreaker
-The repository of a Honkai Star Rail auto farm experiment
+The repository of a Honkai Star Rail automation experiment
 
 Features:
 Slight Movement
-More soon
 
-Currently working on making it less laggy and have more than a 40% chance of working.
-Will expand things for auto farming after more testing 
+Planned:
+Fully automated simulated universe
+Automated Calyx
+Automated Quests
+
+_____________________________________
+Extra Info:
+None for this version but will be some for the next release coming soon.
